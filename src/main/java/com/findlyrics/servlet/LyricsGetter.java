@@ -1,11 +1,15 @@
 package com.findlyrics.servlet;
 
-import com.findlyrics.db.service.ILyricService;
-import com.findlyrics.db.service.impl.DBLyricsService;
+import com.findlyrics.db.dao.IArtistDAO;
+import com.findlyrics.db.dao.PartialDataAccessDAO;
+import com.findlyrics.db.dao.impl.ArtistDAO;
+import com.findlyrics.db.model.Artist;
+import com.findlyrics.db.model.Song;
 import com.findlyrics.dto.LyricItemDTO;
 import com.findlyrics.dto.LyricsDTO;
 import com.findlyrics.exceptions.DbConnectionException;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -19,67 +23,77 @@ import java.util.List;
  * Created by Padonag on 25.08.2014.
  */
 
-@WebServlet("/search.do")
+@WebServlet("/search.do/*")
 public class LyricsGetter extends HttpServlet {
 
-    String query;
-    LyricsDTO resultDTO;
+
 
     public LyricsGetter() {
         super();
     }
-
-    private void getDto(String query) {
-        resultDTO = new LyricsDTO();
-        ILyricService dbService = new DBLyricsService();
-
-        try {
-            resultDTO = dbService.getDTO(query);
-        } catch (DbConnectionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private List<LyricItemDTO> getPageList(int offset, int noOfRecordsPerPage) {
-        List<LyricItemDTO> pageList = new LinkedList<LyricItemDTO>();
-        for (int i = offset; i < offset + noOfRecordsPerPage; i++) {
-            pageList.add(resultDTO.getSearchResults().get(i));
-        }
-        return pageList;
-    }
-
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         int page = 1;
         int recordsPerPage = 10;
-        if (request.getParameter("query") != null) {
-            query = request.getParameter("query");
-            getDto(query);
-        }
-        if (request.getParameter("page") != null)
+        if(request.getParameter("page") != null)
             page = Integer.parseInt(request.getParameter("page"));
+        PartialDataAccessDAO songDao = new PartialDataAccessDAO();
+        IArtistDAO artistDAO = new ArtistDAO();
 
-        List<LyricItemDTO> resultList = getPageList((page - 1) * recordsPerPage, recordsPerPage);
-        int noOfRecords = resultDTO.getSearchResults().size();
+        List<Song> list = songDao.getSongsPart((page-1)*recordsPerPage,
+                recordsPerPage, request.getParameter("query"));
+        List<LyricItemDTO> resultList = new LinkedList<LyricItemDTO>();
+        for(Song currentSong : list){
+            try {
+                Artist tempArtist = artistDAO.getArtist(currentSong.getArtistId());
+                LyricItemDTO itemDTO = new LyricItemDTO(tempArtist, currentSong);
+                resultList.add(itemDTO);
+            } catch (DbConnectionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int noOfRecords = songDao.getNoOfRecords();
         int noOfPages = (int) Math.ceil(noOfRecords * 1.0 / recordsPerPage);
-        request.setAttribute("songList", resultList);
+        request.setAttribute("songsList", resultList);
         request.setAttribute("noOfPages", noOfPages);
         request.setAttribute("currentPage", page);
-
-
-//        for(int i = 0; i < resultDTO.getSearchResults().size(); i++){
-//            request.setAttribute("name"+i, resultDTO.getSearchResults().get(i));
-//        }
-
-        request.getRequestDispatcher("getlyrics.jsp").forward(request, response);
+        RequestDispatcher view = request.getRequestDispatcher("getlyrics.jsp");
+        view.forward(request, response);
 
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int page = 1;
+        int recordsPerPage = 10;
+        if(request.getParameter("page") != null)
+            page = Integer.parseInt(request.getParameter("page"));
+        PartialDataAccessDAO songDao = new PartialDataAccessDAO();
+        IArtistDAO artistDAO = new ArtistDAO();
 
+        List<Song> list = songDao.getSongsPart((page-1)*recordsPerPage,
+                recordsPerPage, request.getParameter("query"));
+        List<LyricItemDTO> resultList = new LinkedList<LyricItemDTO>();
+        for(Song currentSong : list){
+            try {
+                Artist tempArtist = artistDAO.getArtist(currentSong.getArtistId());
+                LyricItemDTO itemDTO = new LyricItemDTO(tempArtist, currentSong);
+                resultList.add(itemDTO);
+            } catch (DbConnectionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int noOfRecords = songDao.getNoOfRecords();
+        int noOfPages = (int) Math.ceil(noOfRecords * 1.0 / recordsPerPage);
+        request.setAttribute("songsList", resultList);
+        request.setAttribute("noOfPages", noOfPages);
+        request.setAttribute("currentPage", page);
+        RequestDispatcher view = request.getRequestDispatcher("getlyrics.jsp");
+        view.forward(request, response);
 
     }
 }

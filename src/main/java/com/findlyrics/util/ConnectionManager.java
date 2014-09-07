@@ -4,6 +4,7 @@ import com.findlyrics.exceptions.DbConnectionException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.log4j.Logger;
 
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -19,6 +20,7 @@ public class ConnectionManager {
     private static final Logger log = Logger.getLogger(ConnectionManager.class);
     private static Connection connection;
     private static volatile ConnectionManager instance;
+//    private ComboPooledDataSource c3p0Pool;
 
     private ConnectionManager()  {
         Context ctx = null;
@@ -31,6 +33,20 @@ public class ConnectionManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+//        try {
+//            this.c3p0Pool = new ComboPooledDataSource();
+//            c3p0Pool.setDriverClass(PropertiesManager.getProperty("db.driver"));
+//            c3p0Pool.setJdbcUrl(PropertiesManager.getProperty("db.url"));
+//            c3p0Pool.setUser(PropertiesManager.getProperty("db.login"));
+//            c3p0Pool.setPassword(PropertiesManager.getProperty("db.password"));
+//            connection = c3p0Pool.getConnection();
+//
+//        } catch (SQLException e) {
+//            log.debug("Throwing exception", e);
+//            //            throw new DbConnectionException("Db connection is dead!");
+//        } catch (PropertyVetoException e) {
+//            log.debug("Throwing exception", e);
+//        }
 
     }
 

@@ -7,6 +7,7 @@
 --%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
          pageEncoding="ISO-8859-1" %>
+<%@ page errorPage="error.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
@@ -25,18 +26,18 @@
         <th>Lyrics</th>
     </tr>
 
-    <c:forEach var="song" items="${songList}">
+    <c:forEach var="song" items="${songsList}">
         <tr>
             <td>${song.artistName}</td>
             <td>${song.songName}</td>
             <td>
-                <div id="spoiler" style="display:none">
+                <div id="spoiler${song.songName}" style="display:none">
                         ${song.lyrics}
                 </div>
                 <button title="Click to show/hide content" type="button"
-                        onclick="if(document.getElementById('spoiler') .style.display=='none')
-                        {document.getElementById('spoiler') .style.display=''}
-                        else{document.getElementById('spoiler') .style.display='none'}">
+                        onclick="if(document.getElementById('spoiler${song.songName}') .style.display=='none')
+                                {document.getElementById('spoiler${song.songName}') .style.display=''}
+                                else{document.getElementById('spoiler${song.songName}') .style.display='none'}">
                     Show Lyrics
                 </button>
             </td>
