@@ -6,7 +6,6 @@ import com.findlyrics.db.dao.impl.ArtistDAO;
 import com.findlyrics.db.model.Artist;
 import com.findlyrics.db.model.Song;
 import com.findlyrics.dto.LyricItemDTO;
-import com.findlyrics.dto.LyricsDTO;
 import com.findlyrics.exceptions.DbConnectionException;
 
 import javax.servlet.RequestDispatcher;
@@ -23,9 +22,8 @@ import java.util.List;
  * Created by Padonag on 25.08.2014.
  */
 
-@WebServlet("/search.do/*")
+@WebServlet(urlPatterns={"/search.do"})
 public class LyricsGetter extends HttpServlet {
-
 
 
     public LyricsGetter() {
@@ -37,15 +35,17 @@ public class LyricsGetter extends HttpServlet {
 
         int page = 1;
         int recordsPerPage = 10;
-        if(request.getParameter("page") != null)
+        String query = request.getParameter("query");
+        if (request.getParameter("page") != null) {
             page = Integer.parseInt(request.getParameter("page"));
+        }
         PartialDataAccessDAO songDao = new PartialDataAccessDAO();
         IArtistDAO artistDAO = new ArtistDAO();
 
-        List<Song> list = songDao.getSongsPart((page-1)*recordsPerPage,
-                recordsPerPage, request.getParameter("query"));
+        List<Song> list = songDao.getSongsPart((page - 1) * recordsPerPage,
+                recordsPerPage, query);
         List<LyricItemDTO> resultList = new LinkedList<LyricItemDTO>();
-        for(Song currentSong : list){
+        for (Song currentSong : list) {
             try {
                 Artist tempArtist = artistDAO.getArtist(currentSong.getArtistId());
                 LyricItemDTO itemDTO = new LyricItemDTO(tempArtist, currentSong);
@@ -60,6 +60,7 @@ public class LyricsGetter extends HttpServlet {
         request.setAttribute("songsList", resultList);
         request.setAttribute("noOfPages", noOfPages);
         request.setAttribute("currentPage", page);
+        request.setAttribute("query", query);
         RequestDispatcher view = request.getRequestDispatcher("getlyrics.jsp");
         view.forward(request, response);
 
@@ -67,17 +68,18 @@ public class LyricsGetter extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int page = 1;
+//        int page = 1;
         int recordsPerPage = 10;
-        if(request.getParameter("page") != null)
-            page = Integer.parseInt(request.getParameter("page"));
+        String query = request.getParameter("query");
+//        if(request.getParameter("page") != null)
+        int page = Integer.parseInt(request.getParameter("page"));
         PartialDataAccessDAO songDao = new PartialDataAccessDAO();
         IArtistDAO artistDAO = new ArtistDAO();
 
-        List<Song> list = songDao.getSongsPart((page-1)*recordsPerPage,
+        List<Song> list = songDao.getSongsPart((page - 1) * recordsPerPage,
                 recordsPerPage, request.getParameter("query"));
         List<LyricItemDTO> resultList = new LinkedList<LyricItemDTO>();
-        for(Song currentSong : list){
+        for (Song currentSong : list) {
             try {
                 Artist tempArtist = artistDAO.getArtist(currentSong.getArtistId());
                 LyricItemDTO itemDTO = new LyricItemDTO(tempArtist, currentSong);
@@ -92,6 +94,7 @@ public class LyricsGetter extends HttpServlet {
         request.setAttribute("songsList", resultList);
         request.setAttribute("noOfPages", noOfPages);
         request.setAttribute("currentPage", page);
+        request.setAttribute("query", query);
         RequestDispatcher view = request.getRequestDispatcher("getlyrics.jsp");
         view.forward(request, response);
 
