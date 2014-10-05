@@ -6,7 +6,7 @@
     </title>
 </head>
 <body>
-<form method="post" action="/LyricsEE/search.do">
+<form method="post" action="/LyricsEE/search.db">
     <input name="query" type="text" value="" placeholder="enter your query here"/>
     <input name="go" type=submit value="search"/></form>
 </body>

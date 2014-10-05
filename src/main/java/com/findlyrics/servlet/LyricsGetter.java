@@ -22,7 +22,7 @@ import java.util.List;
  * Created by Padonag on 25.08.2014.
  */
 
-@WebServlet(urlPatterns={"/search.do"})
+@WebServlet(urlPatterns={"/search.db"})
 public class LyricsGetter extends HttpServlet {
 
 
